@@ -17,7 +17,7 @@ Commands use the following two golang packages:
 - [spf13/cobra](https://github.com/spf13/cobra)
 - [spf13/viper](https://github.com/spf13/viper)
 
-Viper is used to handle configurable parameters such as hyper parameters using env variables.
+Viper is used to handle configurable parameters such as network hyper parameters using env variables.
 
 ## License
 
