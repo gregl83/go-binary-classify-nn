@@ -50,8 +50,46 @@ func PropagateForward(activations, weights, bias mat.Matrix, activation string) 
 	return activated
 }
 
-func linearBackward() {
-	// todo
+func divide(matrix mat.Matrix, value int) mat.Dense {
+	var res mat.Dense
+
+	res.Apply(func(i, j int, v float64) float64 {
+		return v / float64(value)
+	}, matrix)
+
+	return res
+}
+
+func sumRows(matrix mat.Matrix) mat.Dense {
+	rows, _ := matrix.Dims()
+	res := make([]float64, rows)
+
+	for i := 0; i < rows; i++ {
+		row := matrix.(*mat.Dense).RawRowView(i)
+		var sum float64
+		for r := 0; r < len(row); r++ {
+			sum += row[r]
+		}
+		res[i] = sum
+	}
+
+	return *mat.NewDense(rows, 1, res)
+}
+
+func linearBackward(activationCostGradients, previousActivations, weights, bias mat.Matrix) (mat.Matrix, mat.Matrix, mat.Matrix) {
+	_, cols := previousActivations.Dims()
+
+	var previousActivationCostGradients mat.Dense
+	previousActivationCostGradients.Mul(weights.T(), activationCostGradients)
+
+	var weightCostGradients mat.Dense
+	weightCostGradients.Mul(activationCostGradients, previousActivations.T())
+	weightCostGradients = divide(&weightCostGradients, cols)
+
+	biasCostGradients := sumRows(activationCostGradients)
+	biasCostGradients = divide(&biasCostGradients, cols)
+
+	return &previousActivationCostGradients, &weightCostGradients, &biasCostGradients
 }
 
 // PropagateBackward computes gradient of loss with respect to parameters

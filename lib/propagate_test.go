@@ -110,7 +110,77 @@ func TestForwardPropagateRelu(t *testing.T) {
 }
 
 func TestLinearBackward(t *testing.T) {
-	assert.Equal(t, true, false)
+	expected := map[string][][]float64{
+		"previousActivationCostGradients": {
+			{
+				0.518229681743576,
+				-0.19517421446563102,
+			},
+			{
+				-0.40506361967443677,
+				0.15255392842913582,
+			},
+			{
+				2.3749682481581584,
+				-0.8944539044068955,
+			},
+		},
+		"weightCostGradients": {
+			{
+				-0.1007689501908629,
+				1.406850960443582,
+				1.6499250434203312,
+			},
+		},
+		"biasCostGradients": {
+			{
+				0.506294475,
+			},
+		},
+	}
+
+	activationCostGradients := mat.NewDense(1, 2, []float64{
+		1.62434536,
+		-0.61175641,
+	})
+
+	activations := mat.NewDense(3, 2, []float64{
+		-0.52817175,
+		-1.07296862,
+		0.86540763,
+		-2.3015387,
+		1.74481176,
+		-0.7612069,
+	})
+
+	weights := mat.NewDense(1, 3, []float64{
+		0.3190391,
+		-0.24937038,
+		1.46210794,
+	})
+
+	bias := mat.NewDense(1, 1, []float64{
+		-2.06014071,
+	})
+
+	previousActivationCostGradients, weightCostGradients, biasCostGradients := linearBackward(
+		activationCostGradients,
+		activations,
+		weights,
+		bias,
+	)
+
+	for i := 0; i < len(expected["previousActivationCostGradients"]); i++ {
+		assert.Equal(t, expected["previousActivationCostGradients"][i], previousActivationCostGradients.(*mat.Dense).RawRowView(i))
+	}
+
+	for i := 0; i < len(expected["weightCostGradients"]); i++ {
+		assert.Equal(t, expected["weightCostGradients"][i], weightCostGradients.(*mat.Dense).RawRowView(i))
+	}
+
+	for i := 0; i < len(expected["biasCostGradients"]); i++ {
+		assert.Equal(t, expected["biasCostGradients"][i], biasCostGradients.(*mat.Dense).RawRowView(i))
+	}
 }
 
 func TestPropagateBackward(t *testing.T) {

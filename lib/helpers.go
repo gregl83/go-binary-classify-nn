@@ -7,6 +7,7 @@ import (
 )
 
 func printMatrix(name string, matrix mat.Matrix) {
-	formatted := mat.Formatted(matrix, mat.Prefix("    "), mat.Squeeze())
-	fmt.Printf("%s:\r\n %v\r\n", name, formatted)
+	space := "    "
+	formatted := mat.Formatted(matrix, mat.Prefix(space), mat.Squeeze())
+	fmt.Printf("%s:\r\n%s%v\r\n", name, space, formatted)
 }
