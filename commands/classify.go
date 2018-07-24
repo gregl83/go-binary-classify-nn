@@ -14,7 +14,11 @@ var classifyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Info("classifying input")
 
-		// todo - train
+		// todo - load trained weights
+
+		// todo - load data
+
+		// todo - run classify
 
 		log.Logger.Info("classification completed")
 	},

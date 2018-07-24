@@ -14,7 +14,11 @@ var trainCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Info("training neural network")
 
-		// todo - train
+		// todo - load data
+
+		// todo - run train
+
+		// todo - persist trained weights
 
 		log.Logger.Info("training completed")
 	},
