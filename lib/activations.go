@@ -6,20 +6,20 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func activate(matrix mat.Matrix, activation func(x float64) float64) mat.Matrix {
+func activate(matrix mat.Matrix, activation func(x float64) float64) mat.Dense {
 	var activated mat.Dense
 	activated.Apply(func(i, j int, v float64) float64 {
 		return activation(v)
 	}, matrix)
-	return &activated
+	return activated
 }
 
-func activatePrime(matrix, activations mat.Matrix, activation func(x, z float64) float64) mat.Matrix {
+func activatePrime(matrix, activations mat.Matrix, activation func(x, z float64) float64) mat.Dense {
 	var activated mat.Dense
 	activated.Apply(func(i, j int, v float64) float64 {
 		return activation(v, activations.(*mat.Dense).At(i, j))
 	}, matrix)
-	return &activated
+	return activated
 }
 
 func sigmoid(x float64) float64 {

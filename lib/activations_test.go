@@ -23,7 +23,7 @@ func TestActivateRelu(t *testing.T) {
 	activations := activate(preActivations, relu)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activations.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], activations.RawRowView(i))
 	}
 }
 
@@ -48,7 +48,7 @@ func TestActivateReluPrime(t *testing.T) {
 	activationCostGradients := activatePrime(activationGradients, previousActivationGradients, reluPrime)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activationCostGradients.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], activationCostGradients.RawRowView(i))
 	}
 }
 
@@ -68,7 +68,7 @@ func TestActivateSigmoid(t *testing.T) {
 	activations := activate(preActivations, sigmoid)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activations.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], activations.RawRowView(i))
 	}
 }
 
@@ -93,6 +93,6 @@ func TestActivateSigmoidPrime(t *testing.T) {
 	activationCostGradients := activatePrime(activationGradients, previousActivationGradients, sigmoidPrime)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activationCostGradients.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], activationCostGradients.RawRowView(i))
 	}
 }

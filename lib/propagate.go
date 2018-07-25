@@ -21,33 +21,33 @@ func columnBroadcast(bias mat.Matrix, cols int) mat.Matrix {
 	return res
 }
 
-func linearForward(activations, weights, bias mat.Matrix) mat.Matrix {
-	var preActivated mat.Dense
-	preActivated.Mul(weights, activations)
+func linearForward(previousActivations, weights, bias mat.Matrix) mat.Matrix {
+	var preActivations mat.Dense
+	preActivations.Mul(weights, previousActivations)
 
-	_, cols := preActivated.Dims()
+	_, cols := preActivations.Dims()
 
-	var preActivatedBiased mat.Dense
-	preActivatedBiased.Add(&preActivated, columnBroadcast(bias, cols))
+	var preActivationsBiased mat.Dense
+	preActivationsBiased.Add(&preActivations, columnBroadcast(bias, cols))
 
-	return &preActivatedBiased
+	return &preActivationsBiased
 }
 
-// PropagateForward computes neuron activations in network
-func PropagateForward(activations, weights, bias mat.Matrix, activation string) mat.Matrix {
-	var activated mat.Matrix
+// PropagateForward computes neuron activations in network layer
+func PropagateForward(previousActivations, weights, bias mat.Matrix, activation string) mat.Dense {
+	var activations mat.Dense
 
-	preActivated := linearForward(activations, weights, bias)
+	preActivations := linearForward(previousActivations, weights, bias)
 
 	if activation == "relu" {
-		activated = activate(preActivated, relu)
+		activations = activate(preActivations, relu)
 	}
 
 	if activation == "sigmoid" {
-		activated = activate(preActivated, sigmoid)
+		activations = activate(preActivations, sigmoid)
 	}
 
-	return activated
+	return activations
 }
 
 func divide(matrix mat.Matrix, value int) mat.Dense {
@@ -76,67 +76,33 @@ func sumRows(matrix mat.Matrix) mat.Dense {
 	return *mat.NewDense(rows, 1, res)
 }
 
-func linearBackward(activationCostGradients, previousActivations, weights, bias mat.Matrix) (mat.Matrix, mat.Matrix, mat.Matrix) {
+func linearBackward(linearCostGradients, previousActivations, weights, bias mat.Matrix) (mat.Dense, mat.Dense, mat.Dense) {
 	_, cols := previousActivations.Dims()
 
 	var previousActivationCostGradients mat.Dense
-	previousActivationCostGradients.Mul(weights.T(), activationCostGradients)
+	previousActivationCostGradients.Mul(weights.T(), linearCostGradients)
 
 	var weightCostGradients mat.Dense
-	weightCostGradients.Mul(activationCostGradients, previousActivations.T())
+	weightCostGradients.Mul(linearCostGradients, previousActivations.T())
 	weightCostGradients = divide(&weightCostGradients, cols)
 
-	biasCostGradients := sumRows(activationCostGradients)
+	biasCostGradients := sumRows(linearCostGradients)
 	biasCostGradients = divide(&biasCostGradients, cols)
 
-	return &previousActivationCostGradients, &weightCostGradients, &biasCostGradients
+	return previousActivationCostGradients, weightCostGradients, biasCostGradients
 }
 
-/*
-def linear_activation_backward(dA, cache, activation):
-    """
-    Implement the backward propagation for the LINEAR->ACTIVATION layer.
-
-    Arguments:
-    dA -- post-activation gradient for current layer l
-    cache -- tuple of values (linear_cache, activation_cache) we store for computing backward propagation efficiently
-    activation -- the activation to be used in this layer, stored as a text string: "sigmoid" or "relu"
-
-    Returns:
-    dA_prev -- Gradient of the cost with respect to the activation (of the previous layer l-1), same shape as A_prev
-    dW -- Gradient of the cost with respect to W (current layer l), same shape as W
-    db -- Gradient of the cost with respect to b (current layer l), same shape as b
-    """
-    linear_cache, activation_cache = cache
-
-    if activation == "relu":
-        ### START CODE HERE ### (≈ 2 lines of code)
-        dZ = relu_backward(dA, activation_cache)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
-        ### END CODE HERE ###
-
-    elif activation == "sigmoid":
-        ### START CODE HERE ### (≈ 2 lines of code)
-        dZ = sigmoid_backward(dA, activation_cache)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
-        ### END CODE HERE ###
-
-    return dA_prev, dW, db
- */
-
 // PropagateBackward computes gradient of loss with respect to parameters
-func PropagateBackward(activations mat.Dense, activation string) {
-	var activated mat.Matrix
+func PropagateBackward(activationCostGradients, activations, previousActivations, weights, bias mat.Matrix, activation string) (mat.Dense, mat.Dense, mat.Dense) {
+	var linearCostGradients mat.Dense
 
 	if activation == "relu" {
-		activated = activate(preActivated, reluPrime)
+		linearCostGradients = activatePrime(activationCostGradients, activations, reluPrime)
 	}
 
 	if activation == "sigmoid" {
-		activated = activate(preActivated, sigmoidPrime)
+		linearCostGradients = activatePrime(activationCostGradients, activations, sigmoidPrime)
 	}
 
-	preActivated := linearBackward(activations, weights, bias)
-
-	return activated
+	return linearBackward(&linearCostGradients, previousActivations, weights, bias)
 }
