@@ -8,10 +8,31 @@ import (
 )
 
 func TestCostNotRegularized(t *testing.T) {
-	predictions := mat.NewVecDense(3, []float64{0.8, 0.9, 0.4})
-	labels := mat.NewVecDense(3, []float64{1, 1, 1})
+	expected := [][]float64{
+		{0.41493159961539694},
+	}
+
+	predictions := mat.NewDense(3, 1, []float64{0.8, 0.9, 0.4})
+	labels := mat.NewDense(3, 1, []float64{1, 1, 1})
 
 	cost := Cost(predictions, labels)
 
-	assert.Equal(t, 0.414931599615397, cost)
+	for i := 0; i < len(expected); i++ {
+		assert.Equal(t, expected[i], cost.RawRowView(i))
+	}
 }
+
+//func TestCostRegularized(t *testing.T) {
+//	expected := [][]float64{
+//		{0.41493159961539694},
+//	}
+//
+//	predictions := mat.NewDense(3, 1, []float64{0.8, 0.9, 0.4})
+//	labels := mat.NewDense(3, 1, []float64{1, 1, 1})
+//
+//	cost := Cost(predictions, labels)
+//
+//	for i := 0; i < len(expected); i++ {
+//		assert.Equal(t, expected[i], cost.RawRowView(i))
+//	}
+//}

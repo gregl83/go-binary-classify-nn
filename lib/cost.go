@@ -1,35 +1,29 @@
 package lib
 
 import (
-	"math"
-
 	"gonum.org/v1/gonum/mat"
 )
 
-func log(vector mat.Vector) mat.Vector {
-	var res = mat.NewVecDense(vector.Len(), nil)
-	for i := 0; i < vector.Len(); i++ {
-		res.SetVec(i, math.Log(vector.At(i,0)))
-	}
-	return res
-}
-
-func subtract(value float64, vector mat.Vector) mat.Vector {
-	var res = mat.NewVecDense(vector.Len(), nil)
-	for i := 0; i < vector.Len(); i++ {
-		res.SetVec(i, value - vector.At(i,0))
-	}
-	return res
-}
-
 // Cost (cross-entropy) of predictions to labels
-func Cost(predictions mat.Vector, labels mat.Vector) float64 {
+func Cost(predictions, labels mat.Matrix) mat.Dense {
 	samples, _ := predictions.Dims()
 
-	occured := mat.Dot(labels, log(predictions))
-	noccured := mat.Dot(subtract(1, labels), log(subtract(1, predictions)))
+	predictionsScaled := log(predictions)
 
-	return - ((occured + noccured) / float64(samples))
+	var occured mat.Dense
+	occured.Mul(labels.T(), &predictionsScaled)
+
+	subtractedLabels := subtract(1, labels)
+	subtractedPredictions := subtract(1, predictions)
+	subtractedPredictionsScaled := log(&subtractedPredictions)
+
+	var noccured mat.Dense
+	noccured.Mul(subtractedLabels.T(), &subtractedPredictionsScaled)
+
+	var combined mat.Dense
+	combined.Add(&occured, &noccured)
+
+	return multiply(&combined, -1 / float64(samples))
 }
 
 // CostRegularized computes the cross-entropy cost then adjusts for L2 parameter regularization
@@ -39,6 +33,6 @@ func Cost(predictions mat.Vector, labels mat.Vector) float64 {
     L2_regularization_cost = (1/m * lambd/2) * (np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)))
     cost = cross_entropy_cost + L2_regularization_cost
  */
-func CostRegularized(predictions mat.Vector, labels mat.Vector) float64 {
+func CostRegularized(predictions, labels mat.Matrix) mat.Dense {
 	return Cost(predictions, labels) // FIXME + l2_reg
 }

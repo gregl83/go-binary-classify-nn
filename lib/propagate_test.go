@@ -41,7 +41,7 @@ func TestLinearForward(t *testing.T) {
 	}
 }
 
-func TestPropagateForwardSigmoid(t *testing.T) {
+func TestActivateForwardSigmoid(t *testing.T) {
 	expected := [][]float64{
 		{
 			0.9689002334527027,
@@ -68,14 +68,14 @@ func TestPropagateForwardSigmoid(t *testing.T) {
 		-0.90900761,
 	})
 
-	activations := PropagateForward(previousActivations, weights, bias, "sigmoid")
+	activations := activateForward(previousActivations, weights, bias, "sigmoid")
 
 	for i := 0; i < len(expected); i++ {
 		assert.Equal(t, expected[i], activations.RawRowView(i))
 	}
 }
 
-func TestPropagateForwardRelu(t *testing.T) {
+func TestActivateForwardRelu(t *testing.T) {
 	expected := [][]float64{
 		{
 			3.4389613356978117,
@@ -102,11 +102,15 @@ func TestPropagateForwardRelu(t *testing.T) {
 		-0.90900761,
 	})
 
-	activations := PropagateForward(previousActivations, weights, bias, "relu")
+	activations := activateForward(previousActivations, weights, bias, "relu")
 
 	for i := 0; i < len(expected); i++ {
 		assert.Equal(t, expected[i], activations.RawRowView(i))
 	}
+}
+
+func TestPropagateForward(t *testing.T) {
+	assert.Equal(t, true, false)
 }
 
 func TestLinearBackward(t *testing.T) {
@@ -183,7 +187,7 @@ func TestLinearBackward(t *testing.T) {
 	}
 }
 
-func TestPropagateBackwardRelu(t *testing.T) {
+func TestActivateBackwardRelu(t *testing.T) {
 	expected := map[string][][]float64{
 		"previousActivationCostGradients": {
 			{
@@ -242,7 +246,7 @@ func TestPropagateBackwardRelu(t *testing.T) {
 		2.29220801,
 	})
 
-	previousActivationCostGradients, weightCostGradients, biasCostGradients := PropagateBackward(
+	previousActivationCostGradients, weightCostGradients, biasCostGradients := activateBackward(
 		activationCostGradients,
 		activations,
 		previousActivations,
@@ -264,7 +268,7 @@ func TestPropagateBackwardRelu(t *testing.T) {
 	}
 }
 
-func TestPropagateBackwardSigmoid(t *testing.T) {
+func TestActivateBackwardSigmoid(t *testing.T) {
 	expected := map[string][][]float64{
 		"previousActivationCostGradients": {
 			{
@@ -323,7 +327,7 @@ func TestPropagateBackwardSigmoid(t *testing.T) {
 		2.29220801,
 	})
 
-	previousActivationCostGradients, weightCostGradients, biasCostGradients := PropagateBackward(
+	previousActivationCostGradients, weightCostGradients, biasCostGradients := activateBackward(
 		activationCostGradients,
 		activations,
 		previousActivations,
@@ -343,4 +347,22 @@ func TestPropagateBackwardSigmoid(t *testing.T) {
 	for i := 0; i < len(expected["biasCostGradients"]); i++ {
 		assert.Equal(t, expected["biasCostGradients"][i], biasCostGradients.RawRowView(i))
 	}
+}
+
+func TestPropagateBackward(t *testing.T) {
+	parameters := NewParameters([]int{1,2})
+
+	activations := mat.NewDense(1, 2, []float64{
+		1.78862847,
+		0.43650985,
+	})
+
+	labels := mat.NewDense(1, 2, []float64{
+		1,
+		0,
+	})
+
+	PropagateBackward(activations, labels, parameters)
+
+	assert.Equal(t, true, false)
 }
