@@ -37,15 +37,23 @@ func TestLinearForward(t *testing.T) {
 	preActivations := linearForward(activations, weights, bias)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], preActivations.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], preActivations.RawRowView(i))
 	}
 }
 
 func TestActivateForwardSigmoid(t *testing.T) {
-	expected := [][]float64{
-		{
-			0.9689002334527027,
-			0.11013289497444277,
+	expected := map[string][][]float64{
+		"preActivations": {
+			{
+				3.4389613356978117,
+				-2.0893843586662904,
+			},
+		},
+		"activations": {
+			{
+				0.9689002334527027,
+				0.11013289497444277,
+			},
 		},
 	}
 
@@ -68,18 +76,30 @@ func TestActivateForwardSigmoid(t *testing.T) {
 		-0.90900761,
 	})
 
-	activations := activateForward(previousActivations, weights, bias, "sigmoid")
+	preActivations, activations := activateForward(previousActivations, weights, bias, "sigmoid")
 
-	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activations.RawRowView(i))
+	for i := 0; i < len(expected["preActivations"]); i++ {
+		assert.Equal(t, expected["preActivations"][i], preActivations.RawRowView(i))
+	}
+
+	for i := 0; i < len(expected["activations"]); i++ {
+		assert.Equal(t, expected["activations"][i], activations.RawRowView(i))
 	}
 }
 
 func TestActivateForwardRelu(t *testing.T) {
-	expected := [][]float64{
-		{
-			3.4389613356978117,
-			0,
+	expected := map[string][][]float64{
+		"preActivations": {
+			{
+				3.4389613356978117,
+				-2.0893843586662904,
+			},
+		},
+		"activations": {
+			{
+				3.4389613356978117,
+				0,
+			},
 		},
 	}
 
@@ -102,15 +122,275 @@ func TestActivateForwardRelu(t *testing.T) {
 		-0.90900761,
 	})
 
-	activations := activateForward(previousActivations, weights, bias, "relu")
+	preActivations, activations := activateForward(previousActivations, weights, bias, "relu")
 
-	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], activations.RawRowView(i))
+	for i := 0; i < len(expected["preActivations"]); i++ {
+		assert.Equal(t, expected["preActivations"][i], preActivations.RawRowView(i))
+	}
+
+	for i := 0; i < len(expected["activations"]); i++ {
+		assert.Equal(t, expected["activations"][i], activations.RawRowView(i))
 	}
 }
 
 func TestPropagateForward(t *testing.T) {
-	assert.Equal(t, true, false)
+	expected := []map[string][][]float64{
+		{
+			"preActivations": {},
+			"activations": {
+				{
+					-0.31178367,
+					0.72900392,
+					0.21782079,
+					-0.8990918,
+				},
+				{
+					-2.48678065,
+					0.91325152,
+					1.12706373,
+					-1.51409323,
+				},
+				{
+					1.63929108,
+					-0.4298936,
+					2.63128056,
+					0.60182225,
+				},
+				{
+					-0.33588161,
+					1.23773784,
+					0.11112817,
+					0.12915125,
+				},
+				{
+					0.07612761,
+					-0.15512816,
+					0.63422534,
+					0.810655,
+				},
+			},
+		},
+		{
+			"preActivations": {
+				{
+					-5.2382571105871705,
+					3.180401352320523,
+					0.40745010450572083,
+					-1.886127206781812,
+				},
+				{
+					-2.773582360856901,
+					-0.5617731556620513,
+					3.1814162220477815,
+					-0.9920943234869852,
+				},
+				{
+					4.185009161731126,
+					-1.7800690857353927,
+					-0.14502619481868395,
+					2.7214163884145224,
+				},
+				{
+					5.058508017587575,
+					-1.2567408221128744,
+					-3.545666565291074,
+					3.8232185205319755,
+				},
+
+			},
+			"activations": {
+				{
+					0,
+					3.180401352320523,
+					0.40745010450572083,
+					0,
+				},
+				{
+					0,
+					0,
+					3.1814162220477815,
+					0,
+				},
+				{
+					4.185009161731126,
+					0,
+					0,
+					2.7214163884145224,
+				},
+				{
+					5.058508017587575,
+					0,
+					0,
+					3.8232185205319755,
+				},
+			},
+		},
+		{
+			"preActivations": {
+				{
+					2.2644603043092077,
+					1.0997129756597923,
+					-2.902980248526238,
+					1.5403633530851415,
+				},
+				{
+					6.337225701287243,
+					-2.3811624660405943,
+					-4.11228806440212,
+					4.4858238344688,
+				},
+				{
+					10.375083399778687,
+					-0.6659146592907392,
+					1.636351839685268,
+					8.178701681762597,
+				},
+			},
+			"activations": {
+				{
+					2.2644603043092077,
+					1.0997129756597923,
+					0,
+					1.5403633530851415,
+				},
+				{
+					6.337225701287243,
+					0,
+					0,
+					4.4858238344688,
+				},
+				{
+					10.375083399778687,
+					0,
+					1.636351839685268,
+					8.178701681762597,
+				},
+			},
+		},
+		{
+			"preActivations": {
+				{
+					-3.1986467141819155,
+					0.8711705474068692,
+					-1.402978630810819,
+					-3.0031943133127355,
+				},
+			},
+			"activations": {
+				{
+					0.039216681107889215,
+					0.7049892061769997,
+					0.19734387312466642,
+					0.047281773214557316,
+				},
+			},
+		},
+	}
+
+	parameters := NewParameters([]int{4, 3, 1, 1})
+
+	parameters.Weights = []mat.Dense{
+		*mat.NewDense(0,0,nil),
+		*mat.NewDense(4, 5, []float64{
+			0.35480861,
+			1.81259031,
+			-1.3564758,
+			-0.46363197,
+			0.82465384,
+			-1.17643148,
+			1.56448966,
+			0.71270509,
+			-0.1810066,
+			0.53419953,
+			-0.58661296,
+			-1.48185327,
+			0.85724762,
+			0.94309899,
+			0.11444143,
+			-0.02195668,
+			-2.12714455,
+			-0.83440747,
+			-0.46550831,
+			0.23371059,
+		}),
+		*mat.NewDense(3, 4, []float64{
+			-0.12673638,
+			-1.36861282,
+			1.21848065,
+			-0.85750144,
+			-0.56147088,
+			-1.0335199,
+			0.35877096,
+			1.07368134,
+			-0.37550472,
+			0.39636757,
+			-0.47144628,
+			2.33660781,
+		}),
+		*mat.NewDense(1, 3, []float64{
+			0.9398248,
+			0.42628539,
+			-0.75815703,
+		}),
+	}
+
+	parameters.Bias = []mat.Dense{
+		*mat.NewDense(0,0,nil),
+		*mat.NewDense(4, 1, []float64{
+			1.38503523,
+			-0.51962709,
+			-0.78015214,
+			0.95560959,
+		}),
+		*mat.NewDense(3, 1, []float64{
+			1.50278553,
+			-0.59545972,
+			0.52834106,
+		}),
+		*mat.NewDense(1, 1, []float64{
+			-0.16236698,
+		}),
+	}
+
+	parameters.Activations = []mat.Dense{
+		*mat.NewDense(5, 4, []float64{
+			-0.31178367,
+			0.72900392,
+			0.21782079,
+			-0.8990918,
+			-2.48678065,
+			0.91325152,
+			1.12706373,
+			-1.51409323,
+			1.63929108,
+			-0.4298936,
+			2.63128056,
+			0.60182225,
+			-0.33588161,
+			1.23773784,
+			0.11112817,
+			0.12915125,
+			0.07612761,
+			-0.15512816,
+			0.63422534,
+			0.810655,
+		}),
+		*mat.NewDense(0, 0, nil),
+		*mat.NewDense(0, 0, nil),
+		*mat.NewDense(0, 0, nil),
+	}
+
+	PropagateForward(&parameters)
+
+	for layer, activations := range expected {
+		for i := 0; i < len(activations["preActivations"]); i++ {
+			assert.Equal(t, activations["preActivations"][i], parameters.PreActivations[layer].RawRowView(i))
+		}
+
+		for i := 0; i < len(activations["activations"]); i++ {
+			assert.Equal(t, activations["activations"][i], parameters.Activations[layer].RawRowView(i))
+		}
+	}
 }
 
 func TestLinearBackward(t *testing.T) {

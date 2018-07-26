@@ -4,7 +4,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func linearForward(previousActivations, weights, bias mat.Matrix) mat.Matrix {
+func linearForward(previousActivations, weights, bias mat.Matrix) mat.Dense {
 	var preActivations mat.Dense
 	preActivations.Mul(weights, previousActivations)
 
@@ -14,28 +14,46 @@ func linearForward(previousActivations, weights, bias mat.Matrix) mat.Matrix {
 	var preActivationsBiased mat.Dense
 	preActivationsBiased.Add(&preActivations, &biasScaled)
 
-	return &preActivationsBiased
+	return preActivationsBiased
 }
 
-func activateForward(previousActivations, weights, bias mat.Matrix, activation string) mat.Dense {
+func activateForward(previousActivations, weights, bias mat.Matrix, activation string) (mat.Dense, mat.Dense) {
 	var activations mat.Dense
 
 	preActivations := linearForward(previousActivations, weights, bias)
 
 	if activation == "relu" {
-		activations = activate(preActivations, relu)
+		activations = activate(&preActivations, relu)
 	}
 
 	if activation == "sigmoid" {
-		activations = activate(preActivations, sigmoid)
+		activations = activate(&preActivations, sigmoid)
 	}
 
-	return activations
+	return preActivations, activations
 }
 
 // PropagateForward computes neuron activations for each network layer
-func PropagateForward() {
-	// todo
+func PropagateForward(parameters *Parameters) {
+	layers := len(parameters.Layers)
+	lastLayer := layers - 1
+
+	for layer := 1; layer <= lastLayer; layer++ {
+		previousLayer := layer - 1
+		var activation string
+		if layer == lastLayer {
+			activation = "sigmoid"
+		} else {
+			activation = "relu"
+		}
+
+		parameters.PreActivations[layer], parameters.Activations[layer] = activateForward(
+			&parameters.Activations[previousLayer],
+			&parameters.Weights[layer],
+			&parameters.Bias[layer],
+			activation,
+		)
+	}
 }
 
 func linearBackward(preActivationCostGradients, preActivations, weights, bias mat.Matrix) (mat.Dense, mat.Dense, mat.Dense) {
