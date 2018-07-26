@@ -34,10 +34,10 @@ func TestLinearForward(t *testing.T) {
 		-0.24937038,
 	})
 
-	preActivated := linearForward(activations, weights, bias)
+	preActivations := linearForward(activations, weights, bias)
 
 	for i := 0; i < len(expected); i++ {
-		assert.Equal(t, expected[i], preActivated.(*mat.Dense).RawRowView(i))
+		assert.Equal(t, expected[i], preActivations.(*mat.Dense).RawRowView(i))
 	}
 }
 
@@ -148,7 +148,7 @@ func TestLinearBackward(t *testing.T) {
 		-0.61175641,
 	})
 
-	activations := mat.NewDense(3, 2, []float64{
+	preActivations := mat.NewDense(3, 2, []float64{
 		-0.52817175,
 		-1.07296862,
 		0.86540763,
@@ -169,7 +169,7 @@ func TestLinearBackward(t *testing.T) {
 
 	previousActivationCostGradients, weightCostGradients, biasCostGradients := linearBackward(
 		linearCostGradients,
-		activations,
+		preActivations,
 		weights,
 		bias,
 	)
@@ -222,7 +222,7 @@ func TestActivateBackwardRelu(t *testing.T) {
 		-0.05626683,
 	})
 
-	activations := mat.NewDense(1, 2, []float64{
+	preActivations := mat.NewDense(1, 2, []float64{
 		0.04153939,
 		-1.11792545,
 	})
@@ -248,7 +248,7 @@ func TestActivateBackwardRelu(t *testing.T) {
 
 	previousActivationCostGradients, weightCostGradients, biasCostGradients := activateBackward(
 		activationCostGradients,
-		activations,
+		preActivations,
 		previousActivations,
 		weights,
 		bias,
@@ -303,7 +303,7 @@ func TestActivateBackwardSigmoid(t *testing.T) {
 		-0.05626683,
 	})
 
-	activations := mat.NewDense(1, 2, []float64{
+	preActivations := mat.NewDense(1, 2, []float64{
 		0.04153939,
 		-1.11792545,
 	})
@@ -329,7 +329,7 @@ func TestActivateBackwardSigmoid(t *testing.T) {
 
 	previousActivationCostGradients, weightCostGradients, biasCostGradients := activateBackward(
 		activationCostGradients,
-		activations,
+		preActivations,
 		previousActivations,
 		weights,
 		bias,
@@ -350,19 +350,194 @@ func TestActivateBackwardSigmoid(t *testing.T) {
 }
 
 func TestPropagateBackward(t *testing.T) {
-	parameters := NewParameters([]int{1,2})
+	expected := []map[string][][]float64{
+		{
+			"activationCostGradients": {
+				{
+					0,
+					0.5225790112041578,
+				},
+				{
+					0,
+					-0.3269206014405846,
+				},
+				{
+					0,
+					-0.3207040357289928,
+				},
+				{
+					0,
+					-0.7407918690808015,
+				},
+			},
+			"weightCostGradients": {},
+			"biasCostGradients": {},
+		},
+		{
+			"activationCostGradients": {
+				{
+					0.1291316177875634,
+					-0.44014126700066897,
+				},
+				{
+					-0.14175654703688387,
+					0.48317296172264806,
+				},
+				{
+					0.016637075116516804,
+					-0.05670697422079575,
+				},
+			},
+			"weightCostGradients": {
+				{
+					0.41010001901224874,
+					0.07807203346853249,
+					0.1379844368527405,
+					0.10502167417988163,
+				},
+				{
+					0,
+					0,
+					0,
+					0,
+				},
+				{
+					0.05283651624977053,
+					0.010058654166727897,
+					0.017777655698590702,
+					0.013530795262454466,
+				},
+			},
+			"biasCostGradients": {
+				{
+					-0.22007063350033448,
+				},
+				{
+					0,
+				},
+				{
+					-0.028353487110397875,
+				},
+			},
+		},
+		{
+			"activationCostGradients": {
+				{
+					-0.5590876007916837,
+					1.7746539136487123,
+				},
+			},
+			"weightCostGradients": {
+				{
+					-0.39202432174003965,
+					-0.1332585489800966,
+					-0.04601088848081533,
+				},
+			},
+			"biasCostGradients": {
+				{
+					0.1518786074265034,
+				},
+			},
+		},
+	}
 
-	activations := mat.NewDense(1, 2, []float64{
-		1.78862847,
-		0.43650985,
-	})
+	parameters := NewParameters([]int{4, 3, 1})
+
+	parameters.Weights = []mat.Dense{
+		*mat.NewDense(0,0,nil),
+		*mat.NewDense(3, 4, []float64{
+			-1.31386475,
+			0.88462238,
+			0.88131804,
+			1.70957306,
+			0.05003364,
+			-0.40467741,
+			-0.54535995,
+			-1.54647732,
+			0.98236743,
+			-1.10106763,
+			-1.18504653,
+			-0.2056499,
+		}),
+		*mat.NewDense(1, 3, []float64{
+			-1.02387576,
+			1.12397796,
+			-0.13191423,
+		}),
+	}
+
+	parameters.Bias = []mat.Dense{
+		*mat.NewDense(0,0,nil),
+		*mat.NewDense(3, 1, []float64{
+			1.48614836,
+			0.23671627,
+			-1.02378514,
+		}),
+		*mat.NewDense(1, 1, []float64{
+			-1.62328545,
+		}),
+	}
+
+	parameters.PreActivations = []mat.Dense{
+		*mat.NewDense(0,0,nil),
+		*mat.NewDense(3, 2, []float64{
+			-0.7129932,
+			0.62524497,
+			-0.16051336,
+			-0.76883635,
+			-0.23003072,
+			0.74505627,
+		}),
+		*mat.NewDense(1, 2, []float64{
+			0.64667545,
+			-0.35627076,
+		}),
+	}
+
+	parameters.Activations = []mat.Dense{
+		*mat.NewDense(4, 2, []float64{
+			0.09649747,
+			-1.8634927,
+			-0.2773882,
+			-0.35475898,
+			-0.08274148,
+			-0.62700068,
+			-0.04381817,
+			-0.47721803,
+		}),
+		*mat.NewDense(3, 2, []float64{
+			1.97611078,
+			-1.24412333,
+			-0.62641691,
+			-0.80376609,
+			-2.41908317,
+			-0.92379202,
+		}),
+		*mat.NewDense(1, 2, []float64{
+			1.78862847,
+			0.43650985,
+		}),
+	}
 
 	labels := mat.NewDense(1, 2, []float64{
 		1,
 		0,
 	})
 
-	PropagateBackward(activations, labels, parameters)
+	activationCostGradients, weightCostGradients, biasCostGradients := PropagateBackward(parameters, labels)
 
-	assert.Equal(t, true, false)
+	for layer, gradients := range expected {
+		for i := 0; i < len(gradients["activationCostGradients"]); i++ {
+			assert.Equal(t, gradients["activationCostGradients"][i], activationCostGradients[layer].RawRowView(i))
+		}
+
+		for i := 0; i < len(gradients["weightCostGradients"]); i++ {
+			assert.Equal(t, gradients["weightCostGradients"][i], weightCostGradients[layer].RawRowView(i))
+		}
+
+		for i := 0; i < len(gradients["biasCostGradients"]); i++ {
+			assert.Equal(t, gradients["biasCostGradients"][i], biasCostGradients[layer].RawRowView(i))
+		}
+	}
 }
