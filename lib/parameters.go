@@ -18,10 +18,10 @@ type Parameters struct {
 	Activations []mat.Dense
 }
 
-// GradientUpdate computes and updates weights and bias using gradient costs and weights
-func (p *Parameters) GradientUpdate(weightsCostGradients, biasCostGradients []mat.Dense, learningRate float64) {
+// GradientUpdate computes and updates weights and bias using gradient costs and learning rate
+func (p *Parameters) GradientUpdate(weightCostGradients, biasCostGradients []mat.Dense, learningRate float64) {
 	for layer := 1; layer < len(p.Layers); layer++ {
-		weightsScaled := multiply(&weightsCostGradients[layer], learningRate)
+		weightsScaled := multiply(&weightCostGradients[layer], learningRate)
 		p.Weights[layer].Sub(&p.Weights[layer], &weightsScaled)
 
 		biasScaled := multiply(&biasCostGradients[layer], learningRate)
