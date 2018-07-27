@@ -87,7 +87,7 @@ func activateBackward(activationCostGradients, preActivations, previousActivatio
 }
 
 // PropagateBackward computes gradient of loss with respect to parameters for each layer in network
-func PropagateBackward(parameters Parameters, labels mat.Matrix) ([]mat.Dense, []mat.Dense, []mat.Dense) {
+func PropagateBackward(parameters Parameters, labels mat.Matrix) ([]mat.Dense, []mat.Dense) {
 	layers := len(parameters.Layers)
 	lastLayer := layers - 1
 
@@ -126,5 +126,5 @@ func PropagateBackward(parameters Parameters, labels mat.Matrix) ([]mat.Dense, [
 		)
 	}
 
-	return activationCostGradients, weightCostGradients, biasCostGradients
+	return weightCostGradients, biasCostGradients
 }

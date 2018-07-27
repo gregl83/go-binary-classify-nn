@@ -632,42 +632,10 @@ func TestActivateBackwardSigmoid(t *testing.T) {
 func TestPropagateBackward(t *testing.T) {
 	expected := []map[string][][]float64{
 		{
-			"activationCostGradients": {
-				{
-					0,
-					0.5225790112041578,
-				},
-				{
-					0,
-					-0.3269206014405846,
-				},
-				{
-					0,
-					-0.3207040357289928,
-				},
-				{
-					0,
-					-0.7407918690808015,
-				},
-			},
 			"weightCostGradients": {},
 			"biasCostGradients": {},
 		},
 		{
-			"activationCostGradients": {
-				{
-					0.1291316177875634,
-					-0.44014126700066897,
-				},
-				{
-					-0.14175654703688387,
-					0.48317296172264806,
-				},
-				{
-					0.016637075116516804,
-					-0.05670697422079575,
-				},
-			},
 			"weightCostGradients": {
 				{
 					0.41010001901224874,
@@ -701,12 +669,6 @@ func TestPropagateBackward(t *testing.T) {
 			},
 		},
 		{
-			"activationCostGradients": {
-				{
-					-0.5590876007916837,
-					1.7746539136487123,
-				},
-			},
 			"weightCostGradients": {
 				{
 					-0.39202432174003965,
@@ -805,13 +767,9 @@ func TestPropagateBackward(t *testing.T) {
 		0,
 	})
 
-	activationCostGradients, weightCostGradients, biasCostGradients := PropagateBackward(parameters, labels)
+	weightCostGradients, biasCostGradients := PropagateBackward(parameters, labels)
 
 	for layer, gradients := range expected {
-		for i := 0; i < len(gradients["activationCostGradients"]); i++ {
-			assert.Equal(t, gradients["activationCostGradients"][i], activationCostGradients[layer].RawRowView(i))
-		}
-
 		for i := 0; i < len(gradients["weightCostGradients"]); i++ {
 			assert.Equal(t, gradients["weightCostGradients"][i], weightCostGradients[layer].RawRowView(i))
 		}
