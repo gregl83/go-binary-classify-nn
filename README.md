@@ -23,7 +23,7 @@ This project has been largely abondoned and will likely get archived. For now, f
 
 ## Still Need A NN?
 
-- (Awesome Machine Learning)[https://github.com/josephmisiti/awesome-machine-learning] has a curated list of projects, in your language of choice, for Deep Learning
+- [Awesome Machine Learning](https://github.com/josephmisiti/awesome-machine-learning) has a curated list of projects, in your language of choice, for Deep Learning
 
 ## License
 
