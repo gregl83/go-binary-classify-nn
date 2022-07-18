@@ -1,5 +1,7 @@
 # go-binary-classify-nn
 
+DEPRECATED
+
 GoLang binary classification neural network.
 
 ## Usage
